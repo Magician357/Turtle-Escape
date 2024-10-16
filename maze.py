@@ -15,57 +15,55 @@ class maze:
     def __init__(self,width,height):
         self.width,self.height = width,height
         self.grid = [[[0,0,0,0," ",0,0] for _ in range(width)] for _ in range(height)]
+        
     def __getitem__(self,pos):
         x,y=pos
         return self.grid[y][x]
+    
     def __setitem__(self,pos,newval):
         x,y=pos
         self.grid[y][x]=newval
-    def open(self,x,y,dir,newval=1):
-        # If tried to open an edge
         
+    def open(self,x,y,dir,newval=1):
+        # Open the wall
         self.grid[y][x][dir] = newval
         
+        # If on an edge and the direction points out
         if (dir == 0 and y == 0) \
             or (dir == 1 and x == self.width-1) \
                 or (dir == 2 and y == self.height-1) \
                     or (dir == 3 and x == 0):
                         pass
         else:
+            # Open the adjacent cell
             self.grid[y+dy[dir]][x+dx[dir]][opposite[dir]] = newval
     
     @property
     def display(self):
+        # Turn maze into ascii
+        # First line
         final="+"
         final+="-"*((self.width*3)-1)
         final+="+"
         final+="\n"
         for row in self.grid:
-            curA="|"
-            curB="+"
+            # Generate both the row and line below
+            curA="|" # Actual row
+            curB="+" # Line
             for cell in row:
-                curA+=cell[4]+" "
+                curA+=cell[4]+" " # Add display
+                # If closed add wall, otherwise don't
                 curA+="|" if cell[1] == 0 else " "
                 curB+="--" if cell[2] == 0 else "  "
                 curB+="+"
             final+=curA+"\n"+curB+"\n"
         return final
-    
-    # def crop(self):
-    #     # cuts off top and bottom rows
-    #     print(self.display)
-    #     self.grid = self.grid[1:-1]
-    #     for n in range(self.width):
-    #         self.open(n,0,0,0) # close top
-    #         self.open(n,-1,2,0) # close bottom
-    #     print(self.display)
-    #     self.height-=2
 
 def generate_maze_growing_tree(width,height,choosing_algorithm):
     # Extra1 will be how many times the cell was checked (in index 5)
     
     # Algorithm taken from https://weblog.jamisbuck.org/2011/1/27/maze-generation-growing-tree-algorithm
-    # Although, I didn't take any code from there.
+    # I didn't take any code from there, only the algorithm.
     
     # Algorithm:
     #  Create list C with one cell inside
@@ -75,17 +73,19 @@ def generate_maze_growing_tree(width,height,choosing_algorithm):
     #         If there is, open a passage and add it to C
     #         If there isn't, remove the point from C
     
-    # This line isn't used
-    # height += 2
-    
+    # List with point
     C=[(randint(0,width-1),randint(0,height-1))]
-    used=[]
-    cur_maze=maze(width,height)
-    directions = [0,1,2,3]
-    while len(C) > 0:
+    used=[] # Cells already used
+    cur_maze=maze(width,height) # Create maze
+    directions = [0,1,2,3] # List for directions
+    while len(C) > 0: # While still cells
+        # Choose an index
         cur_index = choosing_algorithm(len(C))
+        # Get the x and y
         x,y = C[cur_index]
+        # Log that this cell was visited
         cur_maze[x,y][5]+=1
+        # Shuffle directions for more randomness
         shuffle(directions)
         found=False
         for d in directions:
@@ -99,6 +99,7 @@ def generate_maze_growing_tree(width,height,choosing_algorithm):
             elif cur_maze[nx,ny][5] > 0:
                 continue # already visited
             else:
+                # Open a path and continue
                 cur_maze.open(x,y,d)
                 C.append((nx,ny))
                 cur_maze[nx,ny][5]+=1
@@ -106,18 +107,17 @@ def generate_maze_growing_tree(width,height,choosing_algorithm):
                 break
         used.append((x,y))
         if not found:
+            # If no unvisited cells, remove it
             C.pop(cur_index)
-    
-    # This line isn't used
-    # cur_maze.crop()
     
     return cur_maze
 
 choose_counter = 0
 def choosing_algorithm(length):
+    # Cycles between first, middle, and last
     global choose_counter
-    choose_counter = (choose_counter+1)%3
-    return (length-1,length//2,0)[choose_counter]
+    choose_counter = (choose_counter+1)%4
+    return (length-1,length//2,0,length-1)[choose_counter]
 
 if __name__ == "__main__":
     test_maze = generate_maze_growing_tree(10,10,choosing_algorithm)

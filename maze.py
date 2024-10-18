@@ -114,7 +114,8 @@ def generate_maze_growing_tree(width,height,choosing_algorithm):
             # If no unvisited cells, remove it
             C.pop(cur_index)
     
-    cur_maze.random_doors()
+    # Open a few random doors to add more paths
+    cur_maze.random_doors(15)
     
     return cur_maze
 

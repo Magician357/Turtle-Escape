@@ -69,7 +69,7 @@ finished = False
 
 space_pressed = False
 
-# 0 is bfs, 1 is dfs
+# 0 is astar, 1 is bfs, 2 is dfs
 solver_type = 0
 
 def reset(full=True):
@@ -94,12 +94,14 @@ def reset(full=True):
         cur_amount =0
     
     # Create the solver
-    solver = (bfs_solver(maze),dfs_solver(maze))[solver_type]
+    solver = (astar_solver(maze),bfs_solver(maze),dfs_solver(maze))[solver_type]
     
     cx,cy = (maze_width-1,0)
     path = []
     
     finished = False
+
+reset()
 
 while running:
     # clear previous frame
@@ -123,6 +125,9 @@ while running:
         reset(False)
     elif pressed[pygame.K_2] and solver_type != 1:
         solver_type=1
+        reset(False)
+    elif pressed[pygame.K_3] and solver_type != 2:
+        solver_type=2
         reset(False)
 
     # draw start and end squares
@@ -190,15 +195,15 @@ while running:
             if not finished:
                 draw_text("Creating path",(10,25),screen)
             else:
-                draw_text(f"Finished, with a distance of {len(path)}. Press S to unhide directions.",(10,25),screen)
+                draw_text(f"Finished, with a distance of {len(path)}, taking {solver.steps} steps. Press S to unhide directions.",(10,25),screen)
         else:
             # Draw circle where the solver is checking
             draw_text("Creating directions",(10,25),screen)
             pygame.draw.circle(screen,(10,100,255),tCell_to_pos(pos),5)
 
-    draw_text(f"Generated using growing tree algorithm, solved using {('breadth', 'depth')[solver_type]} first search. Press space to reset. Press number keys to change solver.",(10,10),screen)
+    draw_text(f"Generated using growing tree algorithm, solved using {('astar','breadth first', 'depth first')[solver_type]} search. Press space to reset. Press number keys to change solver.",(10,10),screen)
 
     pygame.display.flip()
-    pygame.display.set_caption(f"Simple Maze Generator and Solver      Tps: {clock.get_fps():.2f}")
+    pygame.display.set_caption(f"Astar, bfs, dfs maze solver      Tps: {clock.get_fps():.2f}")
 
     clock.tick(fps)  # limit fps

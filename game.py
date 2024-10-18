@@ -1,14 +1,14 @@
 import pygame
 from random import randint
 from maze import generate_maze_growing_tree, choosing_algorithm
-from solve import bfs_solver, propagate_path_from
+from solve import *
 import sys
 
 # Declare variables
 width, height = 900, 800
 maze_width = 35
 maze_height = 25
-fps = 60
+fps = 120
 
 background_color=(255,255,255)
 
@@ -69,6 +69,38 @@ finished = False
 
 space_pressed = False
 
+# 0 is bfs, 1 is dfs
+solver_type = 0
+
+def reset(full=True):
+    
+    global maze
+    global amount_draw,cur_amount
+    global solver
+    global cx,cy,path
+    global finished
+    
+    if full:
+        # Generate the maze
+        maze = generate_maze_growing_tree(maze_width,maze_height,choosing_algorithm)
+        print(maze.display)
+
+        # Open the start and end sides
+        maze.open(0,maze_height-1,2)
+        maze.open(maze_width-1,0,0)
+        
+        # Initialize variables for drawing
+        amount_draw=0
+        cur_amount =0
+    
+    # Create the solver
+    solver = (bfs_solver(maze),dfs_solver(maze))[solver_type]
+    
+    cx,cy = (maze_width-1,0)
+    path = []
+    
+    finished = False
+
 while running:
     # clear previous frame
     screen.fill(background_color)
@@ -83,28 +115,15 @@ while running:
     if pressed[pygame.K_SPACE]:
         if not space_pressed:
             space_pressed = True
-            
-            # Generate the maze
-            maze = generate_maze_growing_tree(maze_width,maze_height,choosing_algorithm)
-            print(maze.display)
-
-            # Open the start and end sides
-            maze.open(0,maze_height-1,2)
-            maze.open(maze_width-1,0,0)
-            
-            # Initialize variables for drawing
-            amount_draw=0
-            cur_amount =0
-            
-            # Create the solver
-            solver = bfs_solver(maze)
-            
-            cx,cy = (maze_width-1,0)
-            path = []
-            
-            finished = False
+            reset()
     else:
         space_pressed=False
+    if pressed[pygame.K_1] and solver_type != 0:
+        solver_type=0
+        reset(False)
+    elif pressed[pygame.K_2] and solver_type != 1:
+        solver_type=1
+        reset(False)
 
     # draw start and end squares
     pygame.draw.rect(screen,(100,255,100),start_rect)
@@ -171,13 +190,13 @@ while running:
             if not finished:
                 draw_text("Creating path",(10,25),screen)
             else:
-                draw_text("Finished. Press S to unhide directions.",(10,25),screen)
+                draw_text(f"Finished, with a distance of {len(path)}. Press S to unhide directions.",(10,25),screen)
         else:
             # Draw circle where the solver is checking
             draw_text("Creating directions",(10,25),screen)
             pygame.draw.circle(screen,(10,100,255),tCell_to_pos(pos),5)
 
-    draw_text("Maze generated using growing tree algorithm. Solved using breadth first search.  Press space to reset.",(10,10),screen)
+    draw_text(f"Generated using growing tree algorithm, solved using {('breadth', 'depth')[solver_type]} first search. Press space to reset. Press number keys to change solver.",(10,10),screen)
 
     pygame.display.flip()
     pygame.display.set_caption(f"Simple Maze Generator and Solver      Tps: {clock.get_fps():.2f}")

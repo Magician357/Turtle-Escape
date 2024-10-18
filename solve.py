@@ -43,6 +43,40 @@ class bfs_solver:
             self.backlog.pop(0) # Remove the cell (already checked)
             return False, (cx,cy) # Return false as it is not finished
         return True, (0,0) # Return true as it is finished
+    
+class dfs_solver(bfs_solver):
+    def __init__(self,maze):
+        super().__init__(maze)
+    
+    def step(self,maze,end_point):
+        # Algorithm:
+        #     While backlog is not empty
+        #         Get newest cell in backlog
+        #         Add every valid neighbor to the backlog
+        #         Log the direction to go backward
+        #         Remove the cell
+        
+        remove_index = -1
+        
+        if len(self.backlog) > 0:
+            cx,cy = self.backlog[-1] # newest item
+            for d in direction_list:
+                nx=cx+dx[d] # Get new position
+                ny=cy+dy[d]
+                # If nx and ny are in bounds
+                # and the cell is unvisited
+                if nx >= 0 and ny >= 0 and nx < self.width and ny < self.height \
+                    and self.directions[ny][nx] == 4 and maze[cx,cy][d] == 1 and self.checked[ny][nx] == 0:
+                        self.backlog.append((nx,ny)) # add to list to be used again
+                        remove_index-=1 # save index of current item
+                        self.directions[ny][nx]=opposite[d] # log path to point
+                        if (nx,ny) == end_point:
+                            self.backlog=[]
+                            return True, (0,0)
+            self.checked[cy][cx] = 1 # Log that it was visited
+            self.backlog.pop(remove_index) # Remove the cell (already checked)
+            return False, (cx,cy) # Return false as it is not finished
+        return True, (0,0) # Return true as it is finished
 
 def propagate_path_from(cx,cy,curpath,sx,sy,directions):
     

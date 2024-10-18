@@ -58,6 +58,10 @@ class maze:
                 curB+="+"
             final+=curA+"\n"+curB+"\n"
         return final
+    
+    def random_doors(self,amount=10):
+        for _ in range(amount):
+            self.open(randint(1,self.width-2),randint(1,self.height-2),randint(0,3))
 
 def generate_maze_growing_tree(width,height,choosing_algorithm):
     # Extra1 will be how many times the cell was checked (in index 5)
@@ -109,6 +113,8 @@ def generate_maze_growing_tree(width,height,choosing_algorithm):
         if not found:
             # If no unvisited cells, remove it
             C.pop(cur_index)
+    
+    cur_maze.random_doors()
     
     return cur_maze
 

@@ -33,7 +33,7 @@ class bfs_solver(solver):
         #     While backlog is not empty
         #         Get oldest cell in backlog
         #         Add every valid neighbor to the backlog
-        #         Log the direction to go backward
+        #         Log the direction to go backward from each neighbor
         #         Remove the cell
         
         if len(self.backlog) > 0:
@@ -94,20 +94,24 @@ class dfs_solver(solver):
 # Note:
 #    Ideas taken from https://matteo-tosato7.medium.com/exploring-the-depths-solving-mazes-with-a-search-algorithm-c15253104899
 #    May not be the exact astar algorithm, but it uses a similar or the same cost function.
+#    How the cost function worked was the only thing taken, all other code was written by me.
 
 class astar_solver(solver):
     def __init__(self,maze):
         super().__init__(maze)
         self.start_point = (0,self.height-1)
-        self.backlog=[(self.start_point,self.heuristic(self.start_point,(self.width-1,0)))] # start point in bottom left corner
+        self.backlog=set([(self.start_point,self.heuristic(self.start_point,(self.width-1,0)))]) # start point in bottom left corner
         # also store cost for each point
     def path_from(self,pos,cur_total=0):
         cx, cy=pos
         if pos == self.start_point or self.directions[cy][cx] == 4:
+            # Reached end
             return cur_total
         else:
+            # Recursively
             nx=cx+dx[self.directions[cy][cx]]
             ny=cy+dy[self.directions[cy][cx]]
+            # Get path from previous
             return self.path_from((nx,ny),cur_total+1)
     def heuristic(self,pos1,pos2):
         return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
@@ -124,9 +128,9 @@ class astar_solver(solver):
         
         if len(self.backlog) > 0:
             
-            cur_index = self.backlog.index(min(self.backlog,key=lambda x:x[1]))
+            cur = min(self.backlog,key=lambda x:x[1])
             
-            cx,cy = self.backlog[cur_index][0] # oldest item
+            cx,cy = cur[0] # oldest item
             for d in direction_list:
                 nx=cx+dx[d] # Get new position
                 ny=cy+dy[d]
@@ -134,13 +138,13 @@ class astar_solver(solver):
                 # and the cell is unvisited
                 if nx >= 0 and ny >= 0 and nx < self.width and ny < self.height \
                     and self.directions[ny][nx] == 4 and maze[cx,cy][d] == 1 and self.checked[ny][nx] == 0:
-                        self.backlog.append(((nx,ny),self.cost((nx,ny),end_point))) # add to list to be used again
+                        self.backlog.add(((nx,ny),self.cost((nx,ny),end_point))) # add to list to be used again
                         self.directions[ny][nx]=opposite[d] # log path to point
                         if (nx,ny) == end_point:
                             self.backlog=[]
                             return True, (0,0)
             self.checked[cy][cx] = 1 # Log that it was visited
-            self.backlog.pop(cur_index) # Remove the cell (already checked)
+            self.backlog.remove(cur) # Remove the cell (already checked)
             self.steps+=1
             return False, (cx,cy) # Return false as it is not finished
         return True, (0,0) # Return true as it is finished

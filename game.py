@@ -49,6 +49,7 @@ print(line_width,line_height)
 
 # Load the arrow picture
 arrow=pygame.transform.scale(pygame.image.load("arrow_right.png"),(line_width-2,line_height-2))
+rotated_arrows = tuple([pygame.transform.rotate(arrow,-90*(n-1)).convert_alpha() for n in range(4)])
 
 start_rect = pygame.rect.Rect(*tCell_to_pos((0,maze_height-1),False),line_width,line_height)
 end_rect = pygame.rect.Rect(*tCell_to_pos((maze_width-1,0),False),line_width,line_height)
@@ -71,6 +72,8 @@ space_pressed = False
 
 # 0 is astar, 1 is bfs, 2 is dfs
 solver_type = 0
+
+cell_dir=4
 
 def reset(full=True):
     
@@ -144,7 +147,8 @@ while running:
             
             # If the cell has been visited by the solver
             # And the path isn't finished or s is pressed
-            if solver.directions[n][i] != 4 and (not finished or pressed[pygame.K_s]):
+            cell_dir=solver.directions[n][i]
+            if cell_dir != 4 and (not finished or pressed[pygame.K_s]):
                 if (n == 0 and i == maze_width-1) or (i == 0 and n == maze_height-1):
                     # Do not draw start and end square
                     pass
@@ -153,8 +157,7 @@ while running:
                     cell_rect = pygame.rect.Rect(curX,curY,line_width,line_height+2)
                     pygame.draw.rect(screen,(200,255,200),cell_rect)
                 # Draw arrow
-                rotated_arrow = pygame.transform.rotate(arrow,-90*(solver.directions[n][i]-1))
-                screen.blit(rotated_arrow,(curX+1,curY+1))
+                screen.blit(rotated_arrows[cell_dir],(curX+1,curY+1))
                 # draw_text(dir_string[solver.directions[n][i]],(curX+line_width/2,curY+line_height/2),screen)
             
             # Drawn after so the lines are over the green boxes
@@ -180,7 +183,7 @@ while running:
     if amount_draw < maze_width*maze_height:
         # Increase the amount of cells to draw
         draw_text("Drawing maze",(10,25),screen)
-        amount_draw+=randint(maze_width//8,maze_width//3)
+        amount_draw+=randint(maze_width//3,maze_width)
     else:
         # Tick the solver
         solved, pos = solver.step(maze,(maze_width-1,0))
@@ -195,13 +198,14 @@ while running:
             if not finished:
                 draw_text("Creating path",(10,25),screen)
             else:
-                draw_text(f"Finished, with a distance of {len(path)}, taking {solver.steps} steps. Press S to unhide directions.",(10,25),screen)
+                draw_text(f"Finished, with a distance of {len(path)}, taking {solver.steps} steps to solve. Press S to unhide directions.",(10,25),screen)
         else:
             # Draw circle where the solver is checking
             draw_text("Creating directions",(10,25),screen)
             pygame.draw.circle(screen,(10,100,255),tCell_to_pos(pos),5)
 
-    draw_text(f"Generated using growing tree algorithm, solved using {('astar','breadth first', 'depth first')[solver_type]} search. Press space to reset. Press number keys to change solver.",(10,10),screen)
+    draw_text(f"Generated using growing tree algorithm, solved using {('astar','breadth first', 'depth first')[solver_type]} search. Press space to reset.",(10,10),screen)
+    draw_text("Press the number keys to change solving algorithm. 1 is astar, 2 is breadth first, 3 is depth first",(10,760),screen)
 
     pygame.display.flip()
     pygame.display.set_caption(f"Astar, bfs, dfs maze solver      Tps: {clock.get_fps():.2f}")

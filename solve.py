@@ -163,3 +163,6 @@ def propagate_path_from(cx,cy,curpath,sx,sy,directions):
         ny=cy+dy[direction]
         curpath.append((nx,ny))
         return False, curpath, (nx,ny)
+
+if __name__ == "__main__":
+    raise Exception("This file is not meant to be run on its own.")

@@ -129,3 +129,4 @@ def choosing_algorithm(length):
 if __name__ == "__main__":
     test_maze = generate_maze_growing_tree(10,10,choosing_algorithm)
     print(test_maze.display)
+    print("THIS FILE IS NOT MEANT TO BE RUN ON ITS OWN")

@@ -115,7 +115,7 @@ def generate_maze_growing_tree(width,height,choosing_algorithm):
             C.pop(cur_index)
     
     # Open a few random doors to add more paths
-    cur_maze.random_doors(20)
+    cur_maze.random_doors((width*height)//45)
     
     return cur_maze
 

@@ -69,6 +69,8 @@ end_point= tCell_to_pos((cx,cy))
 finished = False
 
 space_pressed = False
+left_pressed = False
+right_pressed = False
 
 # 0 is astar, 1 is bfs, 2 is dfs
 solver_type = 0
@@ -123,6 +125,7 @@ while running:
             reset()
     else:
         space_pressed=False
+    
     if pressed[pygame.K_1] and solver_type != 0:
         solver_type=0
         reset(False)
@@ -132,6 +135,28 @@ while running:
     elif pressed[pygame.K_3] and solver_type != 2:
         solver_type=2
         reset(False)
+    
+    if pressed[pygame.K_LEFT] != pressed[pygame.K_RIGHT]:
+        # handle arrow keys
+        # If one is pressed and not the other
+        if pressed[pygame.K_LEFT]:
+            if not left_pressed:
+                left_pressed=True
+                solver_type = (solver_type-1)%3
+                reset(False)
+        else:
+            left_pressed=False
+        
+        if pressed[pygame.K_RIGHT]:
+            if not right_pressed:
+                right_pressed=True
+                solver_type = (solver_type+1)%3
+                reset(False)
+        else:
+            right_pressed=False
+    else:
+        left_pressed = False
+        right_pressed= False
 
     # draw start and end squares
     pygame.draw.rect(screen,(100,255,100),start_rect)
@@ -205,7 +230,7 @@ while running:
             pygame.draw.circle(screen,(10,100,255),tCell_to_pos(pos),5)
 
     draw_text(f"Generated using growing tree algorithm, solved using {('astar','breadth first', 'depth first')[solver_type]} search. Press space to reset.",(10,10),screen)
-    draw_text("Press the number keys to change solving algorithm. 1 is astar, 2 is breadth first, 3 is depth first",(10,760),screen)
+    draw_text("Press the number keys or arrow keys to change solving algorithm. 1 is astar, 2 is breadth first, 3 is depth first",(10,760),screen)
 
     pygame.display.flip()
     pygame.display.set_caption(f"Astar, bfs, dfs maze solver      Tps: {clock.get_fps():.2f}")
